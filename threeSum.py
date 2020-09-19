@@ -1,5 +1,5 @@
 from typing import List
-testNums = [-1, 0, 1, 2, -2, -4] 
+testNums = list(range(-3, 500))
 
 
 # 產生出兩兩數字的可能，每次取一對（不重複取），將這兩個數字相加
@@ -9,52 +9,39 @@ testNums = [-1, 0, 1, 2, -2, -4]
 #                       6. 若目標值等於中間值，那個數字就是我們要找的。 
 class Solution:
 
+    def Combinations(self, nums):
+    # 生成所有可能的 數列中數字 兩兩排列組合
+        allCombinations = []
+        for Num1 in nums:
+            for Num2 in nums:
+                if Num1 != Num2:
+                    Combns = sorted([Num1, Num2])
+                    if Combns not in allCombinations:
+                        allCombinations.append(Combns)
+        return allCombinations
+
     def threeSum(self, nums):
-        # 生成所有可能的 index 兩兩排列組合
-        indexCombinations = []
-        listLength = len(nums)
-        for Index1 in range(listLength):
-            for Index2 in range(listLength):
-                if Index1 != Index2:
-                    Conbinations = sorted([Index1, Index2])
-                    if Conbinations not in indexCombinations:
-                        indexCombinations.append([Index1, Index2])
-        
+        pairwiseNums = self.Combinations(nums)
+        outputResult = []
         # Get residual number list and third number
-        for IndexPair in indexCombinations:
+        for Pair in pairwiseNums:
             ResidualList=[]
-            thirdNumber = 0-(nums[IndexPair[0]] + nums[IndexPair[1]])
-            #print(IndexPair[0], IndexPair[1])
+            thirdNumber = 0-(Pair[0] + Pair[1])
+            #print(Pair[0], Pair[1])
             #print(thirdNumber)
-            for index in range(listLength):
-                if index != IndexPair[0] and index != IndexPair[1]:
-                    ResidualList.append(nums[index])
+            for Num in nums:
+                if Num != Pair[0] and Num != Pair[1]:
+                    ResidualList.append(Num)
             #print(ResidualList)
-            
-            # Binary search
-            outputResult = []
-            startIndex = 0
-            endIndex = len(ResidualList)-1
-    
-            if thirdNumber in ResidualList: # 若第三個數字有在數列中，沒有的話 else
-                if endIndex >= startIndex:
-                    tmpResult = []
-                    midIndex =  int((startIndex + endIndex)/2)
-                    if ResidualList[midIndex] == thirdNumber:
-                        matchIndex = nums.index(ResidualList[midIndex])
-                        tmpResult = tmpResult + sorted(IndexPair + [matchIndex])
-                        outputResult.append(tmpResult)
-                        print(tmpResult)
-                    elif thirdNumber > ResidualList[midIndex]:
-                        startIndex = midIndex+1
-                    else:
-                        endIndex = midIndex-1
 
-            else: # 這組就跳過不輸出東西
-                print('not found')
-                continue
-        return outputResult
+            if thirdNumber in ResidualList:
+                tmp = sorted(Pair+[thirdNumber])
+                if tmp not in outputResult:
+                    # print(tmp)
+                    outputResult.append(tmp)
+        print(outputResult)
+
+        return 
 
 
-#Solution().threeSum(testNums)
 Solution().threeSum(testNums)
