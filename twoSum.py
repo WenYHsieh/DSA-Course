@@ -2,7 +2,7 @@
 # nums = list(range(1000))
 # target = 1997
 
-
+# hash table 的使用 
 
 from typing import List
 class Solution:
