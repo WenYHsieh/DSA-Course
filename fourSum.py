@@ -1,47 +1,43 @@
 class Solution():
-    def fourSum(self, nums, target):
-        """
-        :type nums: List[int]
-        :type target: int
-        :rtype: List[List[int]]
-        """
-        if not nums or len(nums)<4:
-            return
+    def fourSum(self, nums, target):  
+        nums.sort()   
+        numsLength = len(nums)   
+        Result = []
         
-        stack = []
-        nums.sort()
-        
-        for i in range(len(nums)-3):
-            if i>0 and nums[i] == nums[i-1]:
+        for index1 in range(numsLength):
+            if index1>0 and nums[index1] == nums[index1-1]:
                 continue
-            if nums[i] * 4  > target:
+            if nums[index1]*4 > target:
                 break
                 
-            for j in range (i+1, len(nums)-2):
-                if j>i+1 and nums[j] == nums[j-1]:
+            for index2 in range (index1+1, numsLength):
+                if index2>index1+1 and nums[index2] == nums[index2-1]:
                     continue
-                if nums[j] * 3 > target-nums[i]:
+                if nums[index2]*3 > target-nums[index1]:
                     break
-                
-                low = j+1
-                high = len(nums)-1
-                while low < high:
-                    data = (nums[i] + nums[j] + nums[low] + nums[high])
-                    if data == target:
-                        stack.append([nums[i], nums[j], nums[low], nums[high]])
-                        while low < high and nums[low] == nums[low+1]:
-                            low+=1
-                        while low < high and nums[high] == nums[high-1]:
-                            high-=1
-                        low +=1
-                        high -=1
-                    elif (nums[i] + nums[j] + nums[low] + nums[high]) < target:
-                        low +=1
+                # 2 pinter
+                lowIndex = index2+1
+                highIndex = len(nums)-1
+
+                while lowIndex < highIndex:
+                    fourNumSum = nums[index1] + nums[index2] + nums[lowIndex] + nums[highIndex]
+                    if fourNumSum < target:
+                        lowIndex+=1
+                    elif fourNumSum > target: 
+                        highIndex-=1
                     else:
-                        high -=1
-        return stack
+                        tmp = sorted([nums[index1], nums[index2], nums[lowIndex], nums[highIndex]])
+                        Result.append(tmp)
+                        
+                        while lowIndex < highIndex and nums[lowIndex] == nums[lowIndex+1]: 
+                            lowIndex+=1
+                        while lowIndex < highIndex and nums[highIndex] == nums[highIndex-1]:
+                            highIndex-=1
+                        lowIndex+=1
+                        highIndex-=1
 
-nums = list(range(-3,100000))
+        return Result
 
+nums = [1, 0, -1, -2, 2]
 target = 0
 print(Solution().fourSum(nums, target))
