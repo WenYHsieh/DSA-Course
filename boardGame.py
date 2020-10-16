@@ -38,20 +38,15 @@ class BoardGame:
             self.Id[j] = i
             self.Depth[i] += self.Depth[j]
 
-
-    def find(self, p, q): # 丟兩個轉換後的index (p,q) 回傳他們是否在同個CC
-        return self.root(p) == self.root(q)
-
     def xyToIndex(self, x: int, y: int):
         return (x*self.col)+y
+
     def directionExistance(self, index: int): # 丟一個座標，回傳該座標上下左右存在的index list
-        #Directions = [[i-1,j],[i+1,j],[i,j-1],[i,j+1]]
-        i = int(index/self.Size)
-        j = index%self.Size
-        directionIndexs = [self.xyToIndex(i-1,j), self.xyToIndex(i+1,j), self.xyToIndex(i,j-1), self.xyToIndex(i,j+1)]
-        existDirectionIndexs = list(filter(lambda x: x in range(self.Size**2), directionIndexs)) 
-    
-        return existDirectionIndexs
+        i = int(index/self.col)
+        j = index%self.col
+        Directions = list(filter(lambda x:x[0] in range(self.row) and x[1] in range(self.col), [[i-1,j],[i+1,j],[i,j-1],[i,j+1]]))
+        self.directionIndexs = [self.xyToIndex(x[0],x[1]) for x in Directions]
+        return self.directionIndexs
 
     def putStone(self, x :List[int], y :List[int], stoneType :str):
         """
@@ -65,35 +60,38 @@ class BoardGame:
             stoneType (string): The type of the stones to be put ont the board, which has only two values {'O', 'X'}
         """
         # get index set
-        Indexs = [self.xyToIndex(x[i], y[i]) for i in range(len(x))]
+        self.Indexs = [self.xyToIndex(x[i], y[i]) for i in range(len(x))]
         # record stone
-        self.Stones.update({Indexs[i]:stoneType for i in range(len(x))})
-        # set all Perimeter to 4
-        self.Perimeters.update({self.root(Indexs[i]):4 for i in range(len(x))})
-        Counter = 0
-        for index in Indexs:
+        self.Stones.update({self.Indexs[i]:stoneType for i in range(len(x))})
+        # set all default Perimeter to 4
+        self.Perimeters.update({self.root(self.Indexs[i]):4 for i in range(len(x))})
+
+        for index in self.Indexs: # 所有新放進去的stones 一個個拿出來
             avaliableSurrounding = self.directionExistance(index)
-            if avaliableSurrounding == []:
+
+            if avaliableSurrounding != []: # 如果上述列表還有東西就要開始查
+                rootCheckedList=[]
+                for asi in avaliableSurrounding:
+                    if asi in self.Stones.keys():# 有放過stone的格子才有紀錄，所以要跳過還沒放過stone的格子不查
+                        rootOfASI = self.root(asi) # 再找拿起來比的周邊那顆的root 存著
+                        rootCheckedList.append(rootOfASI) 
+
+                        if self.Stones[index] == self.Stones[asi]: # 如果是相同型的 stone
+                            if rootCheckedList.count(rootOfASI) == 1:
+                                self.union(index, asi)
+                                rootOfIndex = self.root(index)  # 把她周圍能夠查詢的方位的index列出來
+                                self.Perimeters.update({rootOfIndex:(self.Perimeters[rootOfIndex]+self.Perimeters[rootOfASI])-2})
+
+                            if rootCheckedList.count(rootOfASI) > 1:   
+                                rootOfIndex = self.root(index)  # 把她周圍能夠查詢的方位的index列出來
+                                self.Perimeters.update({rootOfIndex:self.Perimeters[rootOfIndex]-2})
+                        
+                        else: # 如果是不同型的 stone
+                            rootOfIndex = self.root(index)  # 把她周圍能夠查詢的方位的index列出來
+                            self.Perimeters.update({rootOfIndex:self.Perimeters[rootOfIndex]-1}) # 新放的這棵本身要周長-1
+                            self.Perimeters.update({rootOfASI:self.Perimeters[rootOfASI]-1}) # 周圍那顆周長也要-1
+            else:
                 break
-            for asi in avaliableSurrounding:
-                p = self.root(index)
-                q = self.root(asi)
-
-                if self.Stones[index] == self.Stones[asi]: # 如果是相同型的 stone
-                    if q == asi: # 如果周圍的那個是自成一組
-                        self.union(index, asi)
-                        self.Perimeters.update({self.root(index):self.Perimeters[p]+4-2})
-                    if q != asi and Counter == 0:  # 如果周圍的那個並非自成一組
-                        self.union(index, asi)
-                        self.Perimeters.update({self.root(index):self.Perimeters[p]+4-2})
-                        Counter+=1
-                    if q != asi and Counter != 0: # 如果周圍的那個並非自成一組，而且不是第一次查到這組
-                        self.union(index, asi)
-                        self.Perimeters.update({self.root(index):self.Perimeters[p]-2})
-                        Counter+=1
-
-                else: # 如果是不同型的 stone
-                    self.Perimeters.update({self.root(index):self.Perimeters[p]-1})
             
         return
 
@@ -128,6 +126,17 @@ class BoardGame:
         stoneType = self.Stones[Index]
         return stoneType
 
-g = BoardGame(3, 3)
-g.putStone([1], [1], 'O')
-print(g.surrounded(1, 1))
+# g = BoardGame(3, 3)
+# g.putStone([1], [1], 'O')
+# print(g.surrounded(1, 1))
+
+# g.putStone([0,1, 1], [1, 0, 2], 'X')
+# # print(g.Perimeters)
+# print(g.surrounded(1, 1))
+
+# g.putStone([2], [1], 'X')
+# print(g.surrounded(1, 1))
+# print(g.surrounded(2, 1))
+
+# g.putStone([2], [0], 'O')
+# print(g.surrounded(2, 0))
