@@ -11,11 +11,9 @@ class Restaurant(object): # construct restaurant object
 
     def getID(self) -> int:
         return self.Id
-    
-    def getDistance(self):
-        return self.Distance
 
-    def __lt__(self, b) -> bool: # Comparable in Object -> define behaviour of '<', less than operator
+    def __lt__(self, b) -> bool: 
+        # natural comparator in Object -> define behaviour of '<', less than operator, and which is also sorted() default comparator
         """
         The natural comparator of Restaurant
         
@@ -25,8 +23,9 @@ class Restaurant(object): # construct restaurant object
         If the value is the same, keep the same order as input.
         """
         # b is a restaurant Object
-        int1 = (self.Distance*self.Price)/self.Rate
-        int2 = (b.Distance/b.Price)/b.Rate
+        # distance * price / rate = (distance/rate)*(price/rate)*rate
+        int1 = (self.Distance/self.Rate)*(self.Price/self.Rate)*self.Rate
+        int2 = (b.Distance/b.Rate)*(b.Price/b.Rate)*b.Rate
         if int1 < int2: 
             return True
 
@@ -69,43 +68,45 @@ class Restaurants(object):
     def filter(self, min_price: int, max_price :int, min_rate: int) -> List[int]:
         """
         Filter the restaurants, output the list of restaurant id that meet the condition.
-
+        condition: min_price <= price <= max_price and rate >= min_rate
         Output the list in in the increasing order of distance;
         If the distance is the same, order the restaurant ids from the highest to the lowest.
 
         Returns:
             restaurants (List[int]): The list of restaurant id.
         """
+        # 排序:
+        # binary search
         
         return 0
 
 
-if __name__ == "__main__":
-    rests = [
-        # id, rate, price, distance
-        Restaurant(20, 1, 20, 12),
-        Restaurant(15, 3, 19, 11),
-        Restaurant(19, 4, 19, 12),
-        Restaurant(18, 5, 20, 11),
-    ]
-    r = Restaurants(rests)
-    print(r.filter(0, 25, 3)) 
-    print(r.filter(0, 25, 4)) 
-    print(r.filter(0, 20, 1)) 
-    print(r.filter(0, 10, 1))
-    print(r.filter(0, 19, 1))
-    print(r.filter(19, 19, 3))
+# if __name__ == "__main__":
+#     rests = [
+#         # id, rate, price, distance
+#         Restaurant(20, 1, 20, 12),
+#         Restaurant(15, 3, 19, 11),
+#         Restaurant(19, 4, 19, 12),
+#         Restaurant(18, 5, 20, 11),
+#     ]
+#     r = Restaurants(rests)
+#     print(r.filter(0, 25, 3)) 
+#     print(r.filter(0, 25, 4)) 
+#     print(r.filter(0, 20, 1)) 
+#     print(r.filter(0, 10, 1))
+#     print(r.filter(0, 19, 1))
+#     print(r.filter(19, 19, 3))
 
     # case6 測是物件實作的comparator
-    # rests = [
-    #     # id, rate, price, distance
-    #     Restaurant(3, 2, 3, 8),
-    #     Restaurant(0, 2, 4, 6),
-    #     Restaurant(2, 4, 5, 12),
-    #     Restaurant(1, 5, 6, 11),
-    # ]
-    # print([i.getID() for i in sorted(rests)])
-    # print([i.getID() for i in sorted(rests, key=functools.cmp_to_key(Restaurant.comparator1))])
+    rests = [
+        # id, rate, price, distance
+        Restaurant(3, 2, 3, 8),
+        Restaurant(0, 2, 4, 6),
+        Restaurant(2, 4, 5, 12),
+        Restaurant(1, 5, 6, 11),
+    ]
+    print([i.getID() for i in sorted(rests)])
+    print([i.getID() for i in sorted(rests, key=functools.cmp_to_key(Restaurant.comparator1))])
 
 
 #Output:
